@@ -37,7 +37,7 @@ The event types are:
 If a directory is added or deleted, events for all its sub-directories and contained
 files are not generated.
 
-All file directory names are normalized to forward slash format.  The file name
+All file and directory names are normalized to forward slash format.  The file name
 for `dir` events is always suffixed with a '/'.  A 'delete
 
 ## Coalescing Periods
