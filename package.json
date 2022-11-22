@@ -16,7 +16,7 @@
   "license": "Apache-2.0",
   "main": "svmon.js",
   "bin": {
-    "svmon": "./svmon.js"
+    "svmon": "./bin/svmon.js"
   },
   "preferGlobal": true,
   "keywords": [ 
