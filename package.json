@@ -1,0 +1,36 @@
+{
+  "name": "@toptensoftware/svmon",
+  "version": "1.0.0",
+  "description": "Simple command line utility to watch a directory for changes and HTTP POST to server",
+  "author": "Topten Software",
+  "contributors": [
+    {
+      "name": "Brad Robinson",
+      "email": "contact@toptensoftware.com"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toptensoftware/svmon"
+  },
+  "license": "Apache-2.0",
+  "main": "svmon.js",
+  "bin": {
+    "svmon": "./svmon.js"
+  },
+  "preferGlobal": true,
+  "keywords": [ 
+    "file watcher", 
+    "file monitor", 
+    "directory monitor", 
+    "directory watcher", 
+    "folder monitor", 
+    "folder watcher",
+    "post", 
+    "http" 
+  ],
+  "dependencies": {
+    "commander": "^9.4.1",
+    "node-fetch": "^2.6.7"
+  }
+}
