@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 let fetch = require('node-fetch');
 let watchRecursive = require('./watchRecursive');
 let { program } = require('commander');
