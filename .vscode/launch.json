@@ -11,12 +11,13 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\svmon.js",
+            "program": "${workspaceFolder}/svmon.js",
             "args": [
                 ".",
                 "--minPeriod", "1",
+                "--maxPeriod", "100000",
                 "--logBody",
-                "--verbose",
+//                "--verbose",
                 "--plainText",
                 "--withEvent",
             ]

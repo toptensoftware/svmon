@@ -65,7 +65,7 @@ function watchAndStatRecursive_fallback(basedir, callback)
             // Quit if failed
             if (err)
             {
-                callback('error', null, err);
+                //callback('error', null, err);
             }
             else
             {
@@ -73,7 +73,7 @@ function watchAndStatRecursive_fallback(basedir, callback)
                 for (let subdir of data)
                 {
                     let fullsubdir = path.join(dir, subdir);
-                    allKnownDirectories.add(fullsubdir);
+                    allKnownDirectories.add(path.join(reldir, subdir));
                     if (!watchers.has(fullsubdir))
                     {
                         watchers.set(fullsubdir, fs.watch(fullsubdir + path.sep, function (event, filename){
@@ -131,6 +131,7 @@ function watchAndStatRecursive_fallback(basedir, callback)
                     {
                         // Remember this was not a directory
                         allKnownDirectories.delete(filename);
+                        start_next();
                     }
                 }
                 else if (err && err.code == 'ENOENT')
@@ -324,7 +325,7 @@ function coalesc(target, options)
         if (closed)
             return;
 
-        options?.verbose(`# ${event} ${filename} ${err?.code ?? '-'}, ${stat?.isDirectory() ?? '-'}`);
+        options.verbose?.(`# ${event} ${filename} ${err?.code ?? '-'}, ${stat?.isDirectory() ?? '-'}`);
             
         // Reset min timer
         if (minTimer)

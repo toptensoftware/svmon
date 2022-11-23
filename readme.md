@@ -8,18 +8,25 @@ posts notifications to a HTTP server.
 ```
 Usage: svmon [options] <directory>
 
+Watches a directory for changes and posts change notifications to a souvenir server
+
 Options:
   --minPeriod <minPeriodSecs>  minimum coalescing period (default=60) (default: 60)
   --maxPeriod <minPeriodSecs>  maximum coalescing period (default=600) (default: 600)
+  --include <spec...>          files to include (default = all)
+  --exclude <spec...>          files to exclude (default = none)
+  --includeMime <mimeType...>  files to include by MIME type
+  --excludeMime <mimeType...>  files to exclude by MIME type
   --post <endPoint>            URL of the souvenir server to post to
   --prefix <prefix>            a prefix to prepend to each file name
   --plainText                  send body as plain text file list instead of JSON
-  --withEvent                  include the event type in plain text format ('delete', 'dir', 'file' at   
-                               start of line)
+  --withEvent                  include the event type in plain text format ('delete' or 'change' 
+                                at start of line)
   --logTime                    write to output the time of each event batch
   --logBody                    write to output the post body
   --logEvents                  write a list of events to output
   --logResponse                log response to the http post
+  --verbose                    logs raw file change notifications
   -h, --help                   display help for command
 ```
 

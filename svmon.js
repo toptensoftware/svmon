@@ -6,8 +6,7 @@ let { program } = require('commander');
 let Minimatch = require('minimatch').Minimatch;
 
 let watchRecursive = require('./watchRecursive');
-let mimeMatch = require('./mimeMatch');
-const mimematch = require('./mimeMatch');
+let mimematch = require('./mimematch');
 
 function minimatch(pattern, matchNoExt)
 {
