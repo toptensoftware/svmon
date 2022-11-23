@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+let fs = require('fs');
 let path = require('path');
 let fetch = require('node-fetch');
 let { program } = require('commander');
@@ -23,9 +24,12 @@ function minimatch(pattern, matchNoExt)
     } 
 }
 
+let pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json')), "utf8");
+
 program
     .description("Watches a directory for changes and posts change notifications to a HTTP server")
     .argument("<directory>")
+    .version(pkg.version, '-v, --vers', 'output the current version')
     .option("--minPeriod <minPeriodSecs>", "minimum coalescing period (default=60)", 60)
     .option("--maxPeriod <minPeriodSecs>", "maximum coalescing period (default=600)", 600)
     .option("--include <spec...>", "files to include (default = all)")
@@ -33,9 +37,9 @@ program
     .option("--includeMime <mimeType...>", "files to include by MIME type")
     .option("--excludeMime <mimeType...>", "files to exclude by MIME type")
     .option("--post <endPoint>", "URL of the HTTP endpoint to post to")
-    .option("--prefix <prefix>", "a prefix to prepend to each file name") 
+    .option("--prefix <prefix>", "a prefix to prepend to each filename") 
     .option("--plainText", "send body as plain text file list instead of JSON")
-    .option("--withEvent", "include the event type in plain text format ('delete', 'dir', 'file' at start of line)")
+    .option("--withEvent", "include the event type in plain text format ('delete', 'change' at start of line)")
     .option("--logTime", "write to output the time of each event batch")
     .option("--logBody", "write to output the post body")
     .option("--logEvents", "write a list of events to output")
@@ -146,6 +150,11 @@ program
 
     });
 
+program.addHelpText('before', function() {
+    return `svmon ${pkg.version} - Directory Monitoring Utility
+Copyright (C) 2022 Topten Software. All Rights Reserved
+`;
+});
 
 // Run it...
 program.parse();
