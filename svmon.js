@@ -17,6 +17,7 @@ program
     .option("--logBody", "write to output the post body")
     .option("--logEvents", "write a list of events to output")
     .option("--logResponse", "log response to the http post")
+    .option("--verbose", "logs raw file change notifications")
     .action(function(directory, options) {
 
         if (!options.prefix)
@@ -26,6 +27,7 @@ program
         watchRecursive(directory, {
             minPeriod: (parseInt(options.minPeriod) || 60) * 1000,
             maxPeriod: (parseInt(options.maxPeriod) || 600) * 1000,
+            verbose: options.verbose ? console.log : null
         }, async function(ops) {
 
             // Fix up things

@@ -264,6 +264,8 @@ function coalesc(target, options)
         if (closed)
             return;
 
+        options?.verbose(`${event} ${filename} ${err?.code ?? '-'}, ${stat?.isDirectory() ?? '-'}`);
+
         // Reset min timer
         if (minTimer)
             clearTimeout(minTimer);
