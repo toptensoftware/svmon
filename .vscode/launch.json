@@ -17,7 +17,8 @@
                 "--minPeriod", "1",
                 "--logBody",
                 "--verbose",
-                "--plainText"
+                "--plainText",
+                "--withEvent",
             ]
         }
     ]

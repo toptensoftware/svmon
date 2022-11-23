@@ -19,18 +19,20 @@
     "svmon": "./svmon.js"
   },
   "preferGlobal": true,
-  "keywords": [ 
-    "file watcher", 
-    "file monitor", 
-    "directory monitor", 
-    "directory watcher", 
-    "folder monitor", 
+  "keywords": [
+    "file watcher",
+    "file monitor",
+    "directory monitor",
+    "directory watcher",
+    "folder monitor",
     "folder watcher",
-    "post", 
-    "http" 
+    "post",
+    "http"
   ],
   "dependencies": {
     "commander": "^9.4.1",
+    "mime-db": "^1.52.0",
+    "minimatch": "^5.1.0",
     "node-fetch": "^2.6.7"
   }
 }

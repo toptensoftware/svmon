@@ -53,6 +53,10 @@ function watchAndStatRecursive_fallback(basedir, callback)
     // Start watching the base directory an all its sub-directories
     watch_all_dirs(basedir, '.');
 
+    // This is a map of all known subdirectories (even those that have
+    // been deleted).
+    let allKnownDirectories = new Set();
+
     function watch_all_dirs(dir, reldir, finished)
     {
         // Recursively find all subdirectories
@@ -61,7 +65,7 @@ function watchAndStatRecursive_fallback(basedir, callback)
             // Quit if failed
             if (err)
             {
-                callback(err);
+                callback('error', null, err);
             }
             else
             {
@@ -69,6 +73,7 @@ function watchAndStatRecursive_fallback(basedir, callback)
                 for (let subdir of data)
                 {
                     let fullsubdir = path.join(dir, subdir);
+                    allKnownDirectories.add(fullsubdir);
                     if (!watchers.has(fullsubdir))
                     {
                         watchers.set(fullsubdir, fs.watch(fullsubdir + path.sep, function (event, filename){
@@ -107,25 +112,41 @@ function watchAndStatRecursive_fallback(basedir, callback)
             busy = true;
             fs.stat(fullpath, function(err, stat) {
 
-                // Call listener
-                callback(event, filename, err, stat);
+                let isOrWasDir = stat?.isDirectory() ?? allKnownDirectories.has(filename);
 
-                if (err == null && stat.isDirectory())
+                // Call listener
+                callback(event, filename + (isOrWasDir ? path.sep : ''), err, stat);
+
+                if (err == null)
                 {
-                    // A new directory, we need to watch all its subdirectories too
-                    watch_all_dirs(fullpath, filename, start_next);
-                }
-                else if (err && err.code == 'ENOENT' && watchers.has(fullpath))
-                {
-                    // Close any watchers in this and any subdirectories
-                    watchers.get(fullpath).close();
-                    watchers.delete(fullpath);
-                    for (let wk of watchers.keys())
+                    if (stat.isDirectory())
                     {
-                        if (wk.startsWith(fullpath + path.sep))
+                        // Remember this is a directory
+                        allKnownDirectories.add(filename);
+
+                        // A new directory, we need to watch all its subdirectories too
+                        watch_all_dirs(fullpath, filename, start_next);
+                    }
+                    else
+                    {
+                        // Remember this was not a directory
+                        allKnownDirectories.delete(filename);
+                    }
+                }
+                else if (err && err.code == 'ENOENT')
+                {
+                    if (watchers.has(fullpath))
+                    {
+                        // Close any watchers in this and any subdirectories
+                        watchers.get(fullpath).close();
+                        watchers.delete(fullpath);
+                        for (let wk of watchers.keys())
                         {
-                            watchers.get(wk).close();
-                            watchers.delete(wk);
+                            if (wk.startsWith(fullpath + path.sep))
+                            {
+                                watchers.get(wk).close();
+                                watchers.delete(wk);
+                            }
                         }
                     }
 
@@ -165,15 +186,10 @@ function watchAndStatRecursive_fallback(basedir, callback)
     }
 }
 
-
-// Watches a directory recursively and stats the notified files
-// before calling an event handler
-// callback(event, filename, err, stat)
-// event and filename from the underlying fs.watch()
-// err and state from the stat call on the notifed file
-function watchAndStatRecursive(basedir, callback)
+function watchAndStatRecursive_native(basedir, callback)
 {
-    let busy;
+    let allKnownDirectories;
+    let busy = true;
     let queue = [];
     function handle_event(event, filename)
     {
@@ -186,34 +202,78 @@ function watchAndStatRecursive(basedir, callback)
         {
             process(event, filename);
         }
+    }
 
-        function process(event, filename)
+    function process(event, filename)
+    {
+        // get the full path
+        let fullpath = path.join(basedir, filename);
+
+        // Stat it
+        busy = true;
+        fs.stat(fullpath, function(err, stat) {
+
+            let isOrWasDir = stat?.isDirectory() || allKnownDirectories.has(filename);
+
+            // Call listener
+            callback(event, filename + (isOrWasDir ? path.sep : ''), err, stat);
+
+            if (stat)
+            {
+                if (stat.isDirectory())
+                    allKnownDirectories.add(filename);
+                else
+                    allKnownDirectories.delete(filename);
+            }
+
+            // Continue with next waiting
+            busy = false;
+            process_next();
+
+        });
+    }
+
+    function process_next()
+    {
+        let next = queue.shift();
+        if (next)
         {
-            // get the full path
-            let fullpath = path.join(basedir, filename);
-    
-            // Stat it
-            busy = true;
-            fs.stat(fullpath, function(err, stat) {
-
-                // Call listener
-                callback(event, filename, err, stat);
-
-                // Continue with next waiting
-                busy = false;
-                let next = queue.shift();
-                if (next)
-                {
-                    process(next.event, next.filename);
-                }
-
-            });
+            process(next.event, next.filename);
         }
     }
 
+    // Create watcher
+    let watcher = fs.watch(basedir, { recursive: true }, handle_event);
+
+    // Find initial directory set
+    findAllSubDirectories(basedir, function(err, data) {
+        if (err)
+        {
+            watcher.close();
+            callback()
+        }
+
+        allKnownDirectories = new Set(data);
+        busy = false;
+        process_next();
+    });
+
+    return watcher;
+}
+
+
+
+
+// Watches a directory recursively and stats the notified files
+// before calling an event handler
+// callback(event, filename, err, stat)
+// event and filename from the underlying fs.watch()
+// err and state from the stat call on the notifed file
+function watchAndStatRecursive(basedir, callback)
+{
     try
     {
-        return fs.watch(basedir, { recursive: true }, handle_event);
+        return watchAndStatRecursive_native(basedir, callback);
     }
     catch (err)
     {
@@ -264,22 +324,25 @@ function coalesc(target, options)
         if (closed)
             return;
 
-        options?.verbose(`${event} ${filename} ${err?.code ?? '-'}, ${stat?.isDirectory() ?? '-'}`);
-
+        options?.verbose(`# ${event} ${filename} ${err?.code ?? '-'}, ${stat?.isDirectory() ?? '-'}`);
+            
         // Reset min timer
         if (minTimer)
-            clearTimeout(minTimer);
+        clearTimeout(minTimer);
         minTimer = setTimeout(flush, options.minPeriod || 1000);
-
+        
         // Start the max timer (if not already running)
         if (maxTimer == null)
-            maxTimer = setTimeout(flush, options.maxPeriod || 10000);
+        maxTimer = setTimeout(flush, options.maxPeriod || 10000);
+        
+        if (filename == '.')
+            return;
 
         // Deleted?
         if (err)
         {
             // Pass errors through
-            if (!err.code == 'ENOENT')
+            if (err.code != 'ENOENT')
             {
                 target(event, filename, err, stat)
                 return;
@@ -298,19 +361,17 @@ function coalesc(target, options)
                     return;
 
                 // Previous op was in this deleted directory, remove it
-                if (prev.filename.startsWith(filename + path.sep))
+                if (filename.endsWith(path.sep) && prev.filename.startsWith(filename))
                 {
                     pendingOps.splice(pendingOps.length - 1, 1);
                     continue;
                 }
 
                 // This op was in a previously deleted directory (should never happen)
-                if (filename.startsWith(prev.filename + path.sep))
+                if (prev.filename.endsWith(path.sep) && filename.startsWith(prev.filename))
                 {
                     return;
                 }
-
-                break;
             }
 
             // Deleted
@@ -318,10 +379,10 @@ function coalesc(target, options)
         }
         else
         {
-            let coalescedEvent = stat.isDirectory() ? "dir" : "file";
-
-            if (event == 'change' && coalescedEvent == 'dir')
+            if (event == 'change' && filename.endsWith(path.sep))
                 return;
+            if (event == 'rename')
+                event = 'change';
 
             // Look for a parent directory entry with the same name
             for (let i=pendingOps.length - 1; i>=0; i--)
@@ -333,22 +394,22 @@ function coalesc(target, options)
                     break;
 
                 // Same as existing op?
-                if (prev.event == coalescedEvent && filename == prev.filename)
+                if (prev.event == event && filename == prev.filename)
                     return;
 
                 // Already covered by parent directory?
-                if (filename.startsWith(prev.filename + path.sep))
+                if (prev.filename.endsWith(path.sep) && filename.startsWith(prev.filename))
                     return;
 
                 // Existing entry covered by this new one? (should never happen)
-                if (prev.filename.startsWith(filename + path.sep))
+                if (filename.endsWith(path.sep) && prev.filename.startsWith(filename))
                 {
                     pendingOps.splice(i, 1);
                     continue;
                 }
             }
 
-            pendingOps.push({ event: coalescedEvent, filename }) ;
+            pendingOps.push({ event: event, filename }) ;
         }
     }
 
