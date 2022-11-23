@@ -24,7 +24,7 @@ function minimatch(pattern, matchNoExt)
 }
 
 program
-    .description("Watches a directory for changes and posts change notifications to a souvenir server")
+    .description("Watches a directory for changes and posts change notifications to a HTTP server")
     .argument("<directory>")
     .option("--minPeriod <minPeriodSecs>", "minimum coalescing period (default=60)", 60)
     .option("--maxPeriod <minPeriodSecs>", "maximum coalescing period (default=600)", 600)
@@ -32,7 +32,7 @@ program
     .option("--exclude <spec...>", "files to exclude (default = none)")
     .option("--includeMime <mimeType...>", "files to include by MIME type")
     .option("--excludeMime <mimeType...>", "files to exclude by MIME type")
-    .option("--post <endPoint>", "URL of the souvenir server to post to")
+    .option("--post <endPoint>", "URL of the HTTP endpoint to post to")
     .option("--prefix <prefix>", "a prefix to prepend to each file name") 
     .option("--plainText", "send body as plain text file list instead of JSON")
     .option("--withEvent", "include the event type in plain text format ('delete', 'dir', 'file' at start of line)")
