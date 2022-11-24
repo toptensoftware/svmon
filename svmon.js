@@ -64,26 +64,31 @@ program
             if (include.length && !include.some(x => x(filename)))
             {
                 if (options.verbose)
-                    console.log(`excluded by include filter: ${filename}`);
+                    console.log(`# excluded by include filter: ${filename}`);
                 return false;
             }
             if (exclude.length && exclude.some(x => x(filename)))
             {
                 if (options.verbose)
-                    console.log(`excluded by exclude filter ${filename}`);
+                    console.log(`# excluded by exclude filter ${filename}`);
                 return false;
             }
             return true;
         }
 
+        function watchFilter(event, filename, err, stat)
+        {
+            if (options.verbose)
+                console.log(`# ${event} ${filename} ${err ? err.code : '-'}, ${stat ? stat.isDirectory() : '-'}`);
+            return should_include(filename);
+        }
+
+
         watchRecursive(directory, {
             minPeriod: (parseInt(options.minPeriod) || 60) * 1000,
             maxPeriod: (parseInt(options.maxPeriod) || 600) * 1000,
-            verbose: options.verbose ? console.log : null
+            filter: watchFilter,
         }, async function(ops) {
-
-            // Exclude files
-            ops = ops.filter(x => should_include(x.filename));
 
             // Fix up things
             for (let op of ops)

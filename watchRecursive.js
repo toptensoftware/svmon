@@ -194,6 +194,9 @@ function watchAndStatRecursive_native(basedir, callback)
     let queue = [];
     function handle_event(event, filename)
     {
+        if (filename == null)
+            return;
+
         if (busy)
         {
             queue.push({event, filename});
@@ -325,17 +328,18 @@ function coalesc(target, options)
         if (closed)
             return;
 
-        if (options.verbose)
-            options.verbose(`# ${event} ${filename} ${err ? err.code : '-'}, ${stat ? stat.isDirectory() : '-'}`);
-            
-        // Reset min timer
+        // Call filter
+        if (options.filter && !options.filter(event, filename, err, stat))
+            return;
+
+            // Reset min timer
         if (minTimer)
-        clearTimeout(minTimer);
+            clearTimeout(minTimer);
         minTimer = setTimeout(flush, options.minPeriod || 1000);
         
         // Start the max timer (if not already running)
         if (maxTimer == null)
-        maxTimer = setTimeout(flush, options.maxPeriod || 10000);
+            maxTimer = setTimeout(flush, options.maxPeriod || 10000);
         
         if (filename == '.')
             return;
