@@ -35,6 +35,8 @@ function mimematch(matchMimeType, matchNoExt)
             if (ext.length > 1)
             {
                 let mimeType = extMap[ext.substring(1)];
+                if (!mimeType)
+                    return false;
                 return mimeType.startsWith(matchMimeType);
             }
             return matchNoExt;
@@ -48,6 +50,8 @@ function mimematch(matchMimeType, matchNoExt)
             if (ext.length > 1)
             {
                 let mimeType = extMap[ext.substring(1)];
+                if (!mimeType)
+                    return false;
                 return mimeType == matchMimeType;
             }
             return matchNoExt;
