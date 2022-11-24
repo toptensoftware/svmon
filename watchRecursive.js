@@ -112,7 +112,7 @@ function watchAndStatRecursive_fallback(basedir, callback)
             busy = true;
             fs.stat(fullpath, function(err, stat) {
 
-                let isOrWasDir = stat?.isDirectory() ?? allKnownDirectories.has(filename);
+                let isOrWasDir = stat ? stat.isDirectory() : allKnownDirectories.has(filename);
 
                 // Call listener
                 callback(event, filename + (isOrWasDir ? path.sep : ''), err, stat);
@@ -214,7 +214,7 @@ function watchAndStatRecursive_native(basedir, callback)
         busy = true;
         fs.stat(fullpath, function(err, stat) {
 
-            let isOrWasDir = stat?.isDirectory() || allKnownDirectories.has(filename);
+            let isOrWasDir = stat ? stat.isDirectory() : allKnownDirectories.has(filename);
 
             // Call listener
             callback(event, filename + (isOrWasDir ? path.sep : ''), err, stat);
@@ -325,7 +325,8 @@ function coalesc(target, options)
         if (closed)
             return;
 
-        options.verbose?.(`# ${event} ${filename} ${err?.code ?? '-'}, ${stat?.isDirectory() ?? '-'}`);
+        if (options.verbose)
+            options.verbose(`# ${event} ${filename} ${err ? err.code : '-'}, ${stat ? stat.isDirectory() : '-'}`);
             
         // Reset min timer
         if (minTimer)
