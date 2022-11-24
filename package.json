@@ -1,6 +1,6 @@
 {
   "name": "@toptensoftware/svmon",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Simple command line utility to watch a directory for changes and HTTP POST to server",
   "author": "Topten Software",
   "contributors": [
