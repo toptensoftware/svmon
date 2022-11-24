@@ -44,7 +44,7 @@ program
     .option("--logBody", "write to output the post body")
     .option("--logEvents", "write a list of events to output")
     .option("--logResponse", "log response to the http post")
-    .option("--verbose", "logs raw file change notifications")
+    .option("--verbose", "logs info for diagnostics")
     .action(function(directory, options) {
 
         if (!options.prefix)
@@ -62,9 +62,17 @@ program
         function should_include(filename)
         {
             if (include.length && !include.some(x => x(filename)))
+            {
+                if (options.verbose)
+                    console.log(`excluded by include filter: ${filename}`);
                 return false;
+            }
             if (exclude.length && exclude.some(x => x(filename)))
+            {
+                if (options.verbose)
+                    console.log(`excluded by exclude filter ${filename}`);
                 return false;
+            }
             return true;
         }
 

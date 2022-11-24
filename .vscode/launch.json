@@ -17,7 +17,8 @@
                 "--minPeriod", "1",
                 "--maxPeriod", "100000",
                 "--logBody",
-//                "--verbose",
+                "--verbose",
+                "--includeMime", "image",
                 "--plainText",
                 "--withEvent",
             ]
