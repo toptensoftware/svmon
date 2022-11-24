@@ -34,7 +34,7 @@ function mimematch(matchMimeType, matchNoExt)
             let ext = path.extname(filename);
             if (ext.length > 1)
             {
-                let mimeType = extMap[ext.substring(1)];
+                let mimeType = extMap[ext.substring(1).toLowerCase()];
                 if (!mimeType)
                     return false;
                 return mimeType.startsWith(matchMimeType);
@@ -49,7 +49,7 @@ function mimematch(matchMimeType, matchNoExt)
             let ext = path.extname(filename);
             if (ext.length > 1)
             {
-                let mimeType = extMap[ext.substring(1)];
+                let mimeType = extMap[ext.substring(1).toLowerCase()];
                 if (!mimeType)
                     return false;
                 return mimeType == matchMimeType;
