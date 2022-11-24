@@ -52,10 +52,10 @@ program
 
         // generate include/exclude matchers
         let mm_opts = {};
-        let include_mm = options.include?.map(x => minimatch(x, true)) ?? [];
-        let exclude_mm = options.exclude?.map(x => y => minimatch(x, false)) ?? [];
-        let include_mime = options.includeMime?.map(x => mimematch(x, true)) ?? [];
-        let exclude_mime = options.excludeMime?.map(x => mimematch(x, false)) ?? [];
+        let include_mm = options.include ? options.include.map(x => minimatch(x, true)) : [];
+        let exclude_mm = options.exclude ? options.exclude.map(x => y => minimatch(x, false)) : [];
+        let include_mime = options.includeMime ? options.includeMime.map(x => mimematch(x, true)) : [];
+        let exclude_mime = options.excludeMime ? options.excludeMime.map(x => mimematch(x, false)) : [];
         let include = [...include_mm, ...include_mime];
         let exclude = [...exclude_mm, ...exclude_mime];
 
