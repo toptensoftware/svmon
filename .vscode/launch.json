@@ -13,14 +13,10 @@
             ],
             "program": "${workspaceFolder}/svmon.js",
             "args": [
-                "..",
+                "../media",
                 "--minPeriod", "1",
-                "--maxPeriod", "100000",
-                "--logBody",
-                //"--verbose",
-                "--includeMime", "image",
-                "--plainText",
-                "--withEvent",
+                "--verbose",
+                "--logEvents"
             ]
         }
     ]

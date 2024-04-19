@@ -1,4 +1,5 @@
 let fs = require('fs');
+const { platform } = require('os');
 let path = require('path');
 const internal = require('stream');
 
@@ -275,17 +276,10 @@ function watchAndStatRecursive_native(basedir, callback)
 // err and state from the stat call on the notifed file
 function watchAndStatRecursive(basedir, callback)
 {
-    try
-    {
+    if (platform() == "win32")
         return watchAndStatRecursive_native(basedir, callback);
-    }
-    catch (err)
-    {
-        if (err.code == 'ERR_FEATURE_UNAVAILABLE_ON_PLATFORM')
-            return watchAndStatRecursive_fallback(basedir, callback);
-        else
-            throw err;
-    }
+    else
+        return watchAndStatRecursive_fallback(basedir, callback);
 }
 
 // Coalesces callbacks as described for watchRecursive
